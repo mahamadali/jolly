@@ -1,0 +1,74 @@
+{
+    "0": "commander",
+    "1": ".htaccess",
+    "2": "readme",
+    "compiler": {
+        "0": "Engine.php",
+        "1": "ErrorHandler.php",
+        "generator" : {
+            "debugging" : ["backtrace.jly.php"]
+        }
+    },
+    "segments": {
+        "Bones": {
+            "Helpers": ["SystemHelper.php"],
+            "Skeletons": {
+                "DataWing": ["ColumnStructure.php", "Skeleton.php"],
+                "DBFiller": ["Refill.php"],
+                "DBGram": ["Adjustor.php"],
+                "Supporters": ["AutoMethodMap.php", "BaseCodeTemplate.php"],
+                "Database": ["Builder.php", "Config.php", "Raw.php", "Select.php", "UpdateExtraMethods.php"]
+            },
+            "Traits": {
+                "Commander": ["AttrPairGenerator.php"],
+                "DataWing": ["Commands.php"],
+                "Database": ["Process.php", "Query.php"],
+                "Supporter": ["RunInBackground.php"]
+            },
+            "0": "Alert.php",
+            "1": "AppStarter.php",
+            "2": "Commander.php",
+            "3": "Database.php",
+            "4": "DataWing.php",
+            "5": "DateTimer.php",
+            "6": "Exception.php",
+            "7": "File.php",
+            "8": "Language.php",
+            "9": "Redirect.php",
+            "10": "Request.php",
+            "11": "Response.php",
+            "12": "Router.php",
+            "13": "Session.php",
+            "14": "Str.php",
+            "15": "URL.php",
+            "16": "Validation.php",
+            "17": "JollyManager.php",
+            "18": "Set.php"
+        },
+        "Contributors": {
+            "Mail": {
+                "PHPMailer": ["Exception.php", "PHPMailer.php", "SMTP.php"],
+                "0": "Mailer.php"
+            },
+            "Particles": {
+                "Traits": ["AttrBuilder.php"],
+                "0": "Form.php",
+                "1": "Html.php",
+                "2": "Pagination.php"
+            },
+            "SMS": ["Texter.php"]
+        },
+        "Mail": ["WelcomeEmail.php"],
+        "Models": {
+            "Base": {
+                "Supporters": ["Transform.php"],
+                "0": "Model.php"
+            },
+            "Traits": ["Relation.php", "SelfResolve.php", "TrashMask.php"]
+        },
+        "SMS": ["AccountActivated.php"],
+        "views": {
+            "defaults": ["404.jly.php", "503.jly.php", "error.jly.php"]
+        }
+    }
+}

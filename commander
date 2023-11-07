@@ -1,0 +1,9 @@
+<?php
+
+use Bones\Commander;
+
+require_once 'segments/Bones/AppStarter.php';
+
+AppStarter::loadDefaults(microtime(true));
+
+(new Commander($argv))->proceed();
