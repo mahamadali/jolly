@@ -8,9 +8,9 @@ use Bones\BadMethodException;
 
 class Redirect
 {
-    protected int $status;
-    protected array $headers = [];
-    protected string $url;
+    protected $status;
+    protected $headers = [];
+    protected $url;
 
     public function __construct(string $to = '', int $status = 301, array $headers = [])
     {
@@ -104,7 +104,8 @@ class Redirect
                 return $this;
             }
         }
-        throw new BadMethodException($method . ' method not found in '.$this->class);
+
+        throw new BadMethodException($method . ' method not found in ' . get_class($this));
     }
 
 }
