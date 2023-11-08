@@ -7,7 +7,7 @@
 Clone this repository to your system and start using it ðŸ‘
 
 ```bash
-git clone https://wisencode@bitbucket.org/wisencode/jolly.git
+git clone https://github.com/mahamadali/jolly.git
 ```
 
 ### Set up fresh config files
