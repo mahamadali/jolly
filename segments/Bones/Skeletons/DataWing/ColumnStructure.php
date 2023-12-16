@@ -8,7 +8,8 @@ use Bones\DataWingException;
 
 class ColumnStructure
 {
-
+    public $column = null;
+    
     public function __construct($column)
     {
         $this->column = $column;
