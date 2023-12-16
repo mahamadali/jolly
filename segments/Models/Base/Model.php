@@ -125,7 +125,7 @@ class Model
         return $this->db->delete(true);
     }
 
-    public function withTrashed(bool $with_trashed = true)
+    public function prepareWithTrashed(bool $with_trashed = true)
     {
         $this->with_trashed = $with_trashed;
 
