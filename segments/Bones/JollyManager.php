@@ -30,7 +30,7 @@ class JollyManager
     public function generateFileUrls($a, $keys = array())
     {
         if (!is_array($a)) {
-            $this->file_urls[] = $this->endpoint . implode('/', $keys) . '/' . $a;
+            $this->file_urls[] = $this->endpoint . implode('/', $keys) . ((in_array('/' . $a, $this->special_files)) ? $a : '/' . $a );
             return;
         }
 
