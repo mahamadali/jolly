@@ -5,7 +5,7 @@ namespace Bones;
 class JollyManager
 {
     protected $console;
-    protected $endpoint = 'https://bitbucket.org/wisencode/jolly/raw/HEAD/';
+    protected $endpoint = 'https://raw.githubusercontent.com/mahamadali/jolly/main/';
     protected $directory_structure = [];
     protected $file_urls = [];
     protected $special_files = ['/commander', '/readme', '/.htaccess'];
