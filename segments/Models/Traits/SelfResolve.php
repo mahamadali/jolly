@@ -20,8 +20,8 @@ trait SelfResolve
 
         foreach ($this->dynamic_attributes as $attribute) {
             if (!in_array($attribute, array_merge($this->attaches, $this->reserved_props)))
-                if (isset($this->$attribute))
-                    $modelData[$attribute] = $this->$attribute;
+                if (isset($this->dynamicProps[$attribute]))
+                    $modelData[$attribute] = $this->dynamicProps[$attribute];
         }
 
         if ($this->isCloned()) {
@@ -174,7 +174,7 @@ trait SelfResolve
         
         if ($action == 'new') {
             foreach (array_merge($whereData, $additionalData) as $attrName => $attrVal) {
-                $model->$attrName = $attrVal;
+                $model->dynamicProps[$attrName] = $attrVal;
             }
 
             return $model;
@@ -200,7 +200,7 @@ trait SelfResolve
         }
 
         foreach ($data as $attrName => $attrVal) {
-            $model->$attrName = $attrVal;
+            $model->dynamicProps[$attrName] = $attrVal;
         }
 
         return $model->save();
@@ -228,8 +228,9 @@ trait SelfResolve
             foreach (array_unique($this->with) as $with) {
                 $without = $this->circularWiths($this->$with());
                 if (in_array($with, $this->without)) continue;
-                $this->$with = $this->$with()->prepareWithout($without);
-                if (!empty($relationalProps = $this->$with->relationalProps) && !empty($this->$with->relationalProps['type'])) {
+                $this->dynamicProps[$with] = $this->$with()->prepareWithout($without);
+                // opd($this->dynamicProps[$with]->relationalProps);
+                if (!empty($relationalProps = $this->dynamicProps[$with]->relationalProps) && !empty($this->dynamicProps[$with]->relationalProps['type'])) {
                     $model = $this->buildRelationalData($with, $entries, $model, $relationalProps);
                 }
             }
@@ -241,12 +242,12 @@ trait SelfResolve
     public function attachBehaviour($model, $attributes)
     {
         foreach ($attributes as $attribute => $value) {
-            $model->$attribute = $value;
+            $model->dynamicProps[$attribute] = $value;
         }
 
         if (isset($this->skip_attaches) && !$this->skip_attaches) {
             foreach ($this->prop('attaches') as $attach) {
-                $model->$attach = $model->$attach;
+                $model->dynamicProps[$attach] = $model->$attach;
             }
         }
 
@@ -261,13 +262,13 @@ trait SelfResolve
         foreach ($attributes as $attribute => $value) {
             $attribute_method = 'get'.Str::decamelize($attribute).'Property';
             if (method_exists($this->model, $attribute_method)) {
-                $model->$attribute = $model->$attribute_method();
+                $model->dynamicProps[$attribute] = $model->$attribute_method();
             }
         }
 
         foreach ($this->prop('hidden') as $confidential_attr) {
-            if (isset($model->$confidential_attr)) 
-                unset($model->$confidential_attr);
+            if (isset($model->dynamicProps[$confidential_attr])) 
+                unset($model->dynamicProps[$confidential_attr]);
         }
 
         if ($this->isCloned()) {
@@ -317,15 +318,15 @@ trait SelfResolve
                 if ($relational_data != null) {
                     if (is_array($entries)) {
                         foreach ($result as &$entry) {
-                            $entry->$with = [];
+                            $entry->dynamicProps[$with] = [];
                             foreach ($relational_data as $withEntry) {
                                 if ($entry->{$relational_props['local_key']} == $withEntry->{$relational_props['foreign_key']}) {
-                                    $entry->$with[] = $withEntry;
+                                    $entry->dynamicProps[$with][] = $withEntry;
                                 }
                             }
                         }
                     } else {
-                        $result->$with = $relational_data;
+                        $result->dynamicProps[$with] = $relational_data;
                     }
                 } else {
                     $result = $this->setDroplets($result, $with, []);
@@ -352,10 +353,10 @@ trait SelfResolve
                 if ($relational_data != null) {
                     if (is_array($entries)) {
                         foreach ($result as &$entry) {
-                            $entry->$with = null;
+                            $entry->dynamicProps[$with] = null;
                             foreach ($relational_data as $withEntry) {
                                 if ($entry->{$relational_props['foreign_key']} == $withEntry->{$relational_props['local_key']}) {
-                                    $entry->$with = $withEntry;
+                                    $entry->dynamicProps[$with] = $withEntry;
                                 }
                             }
                         }
@@ -387,10 +388,10 @@ trait SelfResolve
                 if ($relational_data != null) {
                     if (is_array($entries)) {
                         foreach ($result as &$entry) {
-                            $entry->$with = null;
+                            $entry->dynamicProps[$with] = null;
                             foreach ($relational_data as $withEntry) {
                                 if ($entry->{$relational_props['local_key']} == $withEntry->{$relational_props['foreign_key']}) {
-                                    $entry->$with = $withEntry;
+                                    $entry->dynamicProps[$with] = $withEntry;
                                 }
                             }
                         }
@@ -433,14 +434,14 @@ trait SelfResolve
                     if (!empty($final_data)) {
                         if (is_array($entries)) {
                             foreach ($result as &$entry) {
-                                $entry->$with = null;
+                                $entry->dynamicProps[$with] = null;
                                 foreach ($intermediate_data as $intermediate) {
                                     $intermediate = (array) $intermediate;
                                     if ($intermediate[$intermediate_model_foreign_key] == $entry->{$local_key}) {
                                         $loop = true;
                                         foreach ($final_data as $final) {
                                             if ($loop && $final->{$final_model_foreign_key} == $intermediate[$intermediate_model_local_key]) {
-                                                $entry->$with = $final;
+                                                $entry->dynamicProps[$with] = $final;
                                                 $loop = false;
                                             }
                                         }
@@ -488,14 +489,14 @@ trait SelfResolve
                     if (!empty($final_data)) {
                         if (is_array($entries)) {
                             foreach ($result as &$entry) {
-                                $entry->$with = [];
+                                $entry->dynamicProps[$with] = [];
                                 foreach ($intermediate_data as $intermediate) {
                                     $intermediate = (array) $intermediate;
                                     if ($intermediate[$intermediate_model_foreign_key] == $entry->{$local_key}) {
                                         $loop = true;
                                         foreach ($final_data as $final) {
                                             if ($loop && $final->{$final_model_foreign_key} == $intermediate[$intermediate_model_local_key]) {
-                                                $entry->$with[] = $final;
+                                                $entry->dynamicProps[$with][] = $final;
                                             }
                                         }
                                     }
@@ -543,13 +544,13 @@ trait SelfResolve
                     if (!empty($final_data)) {
                         if (is_array($entries)) {
                             foreach ($result as &$entry) {
-                                $entry->$with = [];
+                                $entry->dynamicProps[$with] = [];
                                 foreach ($intermediate_data as $intermediate) {
                                     if ($intermediate->$intermediate_to_primary_foreign_key == $entry->{$local_key}) {
                                         $loop = true;
                                         foreach ($final_data as $final) {
                                             if ($loop && $final->{$final_model_local_key} == $intermediate->$intermediate_to_secondary_foreign_key) {
-                                                $entry->$with[] = $final;
+                                                $entry->dynamicProps[$with][] = $final;
                                             }
                                         }
                                     }
@@ -574,7 +575,7 @@ trait SelfResolve
     {
         if (!$this->prop('skip_relationships')) {
             if ($set instanceof Model) 
-                $set->$to = $droplet;
+                $set->dynamicProps[$to] = $droplet;
             else
                 foreach ($set as &$entry) {
                     if (gettype($entry) == 'object') {

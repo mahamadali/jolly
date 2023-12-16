@@ -29,7 +29,6 @@ class Builder
 
     public $model = null;
     public $where_exists = [];
-    public $relationalProps = [];
     
     protected static $PDO_CONN = false;
 

@@ -37,6 +37,9 @@ class Model
     protected $created_at_column = 'created_at';
     protected $updated_at_column = 'updated_at';
 
+    protected $dynamicProps = [];
+    protected $relationalProps= [];
+
     public function __construct()
     {
         $this->model = get_class($this);
@@ -152,7 +155,7 @@ class Model
         if (count($attrs) == 0) return $this;
         
         foreach ($attrs as $attr) {
-            unset($this->$attr);
+            unset($this->dynamicProps[$attr]);
         }
 
         return $this;
@@ -181,8 +184,15 @@ class Model
         return ['_reserved_model_prop_is_only'];
     }
 
+    public function __isset($name)
+    {
+        return isset($this->dynamicProps[$name]);
+    }
+
     public function __get($attribute)
     {
+        $original_attribute = $attribute;
+
         if (empty($attribute) || in_array($attribute, ['attaches', 'with', 'without', 'elements', 'hidden', 'has', 'relationalProps'])) {
             return [];
         }
@@ -196,13 +206,17 @@ class Model
         if (!empty($this->model) && method_exists($this->model, $attributeMehod)) {
             return $this->$attributeMehod();
         }
-        
-        throw new Exception('Property {' . Str::camelize($attribute) . '} not found in ' . $this->model);
+
+        if (isset($original_attribute)) {
+            return $this->dynamicProps[$original_attribute];
+        }
+
+        throw new Exception('Property {' . Str::camelize($original_attribute) . '} not found in ' . $this->model);
     }
 
     public function __set($attribute, $value)
     {
-        $this->$attribute = $value;
+        $this->dynamicProps[$attribute] = $value;
 
         if ($attribute === 'relationalProps')
             $this->db->$attribute = $value;
@@ -212,8 +226,9 @@ class Model
         }
 
         $attributeMehod = 'set' . Str::decamelize($attribute) . 'Property';
+        
         if (method_exists($this->model, $attributeMehod)) {
-            $this->$attributeMehod($value);
+            $this->dynamicProps[$attribute] = $this->$attributeMehod($value);
         }
     }
 
