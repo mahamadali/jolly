@@ -48,6 +48,9 @@ class Model
         $this->db->setPrimaryKey($this->primary_key);
         $this->db->setTimestampsStatus($this->timestamps, $this->created_at_column, $this->updated_at_column);
         $this->db->setTrashMaskStatus($this->hasTrashMask(), $this->getTrashMaskColumn());
+        if (in_array(TrashMask::class, class_uses($this))) {
+            $this->enable_trash_mask = true;
+        }
         $this->db->model = $this;
     }
 
