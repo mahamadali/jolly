@@ -252,7 +252,7 @@ trait SelfResolve
         }
 
         if (!empty($transforms = $this->prop('transforms'))) {
-            foreach ($model as $element_name => &$element_val) {
+            foreach ($model->dynamicProps as $element_name => &$element_val) {
                 if (array_key_exists($element_name, $transforms) && !in_array($element_name, $this->prop('hidden'))) {
                     $element_val = $this->transformElement($transforms[$element_name], $element_val, 'get');
                 }
