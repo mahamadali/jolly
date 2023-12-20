@@ -18,15 +18,8 @@ class Request extends Validation
      */
     public function __construct($request, $files = [], $route = [])
     {
-        foreach ($request as $param => $value) {
-            if (is_array($value)) {
-                array_map(function ($element) use ($request, $param) {
-                    $request[$param] = Str::isBase64Encoded($element) ? $element : urldecode($element);
-                }, $value);
-            } else {
-                $request[$param] = Str::isBase64Encoded($value) ? $value : urldecode($value);
-            }
-        }
+        $this->purifyAttributes($request);
+
         $request['__route'] = $route;
         $this->request = toStdClass($request);
         $this->files = [];
@@ -45,6 +38,23 @@ class Request extends Validation
                 }
             } else {
                 $this->files[$fileName] = new File($file);
+            }
+        }
+    }
+
+    /**
+     * Purify request attributes
+     * 
+     * @param mixed $request
+     * 
+     */
+    private function purifyAttributes(&$request)
+    {
+        foreach ($request as &$value) {
+            if (is_array($value)) {
+                $this->purifyAttributes($value);
+            } else {
+                $value = Str::isBase64Encoded($value) ? $value : urldecode($value);
             }
         }
     }

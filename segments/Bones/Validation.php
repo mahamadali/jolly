@@ -11,6 +11,9 @@ class Validation
     protected $rules;
     protected $errors = [];
     protected $errMsgs;
+    protected $params;
+    protected $files;
+    protected $PARAM_NOT_SET = 'PARAM_NOT_SET';
 
     public function __construct(array $rules = [], array $errMsgs = [])
     {
@@ -18,19 +21,45 @@ class Validation
         $this->errMsgs = $errMsgs;
     }
 
+    private function getParam($element, $params = null)
+    {
+        if ($params === null)
+            $params = $this->params;
+
+        if (isset($params[$element]))
+            return $params[$element];
+
+        $split_element = explode('.', $element);
+
+        foreach ($split_element as $value) {
+            if (is_object($params) && property_exists($params, $value))
+                $params = $params->$value;
+            elseif (is_array($params) && isset($params[$value]))
+                $params = $params[$value];
+            else
+                return $this->PARAM_NOT_SET;
+        }
+
+        return $params;
+    }
+
     public function check(array $params = [], array $files = [])
     {
+        $this->params = $params;
+        $this->files = $files;
+
         foreach ($this->rules as $ruleFor => $rule) {
             $ruleDef = (is_array($rule)) ? $rule : explode('|', $rule);
-            if (array_key_exists($ruleFor, $params)) {
+            $param_value = $this->getParam($ruleFor);
+            if ($param_value !== $this->PARAM_NOT_SET) {
                 foreach ($ruleDef as $ruleName) {
                     if ($ruleName == 'required') {
-                        if (empty($params[$ruleFor])) {
+                        if (empty($this->getParam($ruleFor))) {
                             $this->errors[]  = $this->getErrorMsg($ruleFor, $ruleName);
                         }
                     }
                     if ($ruleName == 'numeric') {
-                        if (!is_numeric($params[$ruleFor])) {
+                        if (!is_numeric($this->getParam($ruleFor))) {
                             $this->errors[]  = $this->getErrorMsg($ruleFor, $ruleName);
                         }
                     }
@@ -38,7 +67,7 @@ class Validation
                         $max = trim(str_replace('max:', '', $ruleName));
                         if (!is_numeric($max))
                             throw new Exception('Validation rule '.$ruleName.' must have numeric value as argument');
-                        if (strlen($params[$ruleFor]) > $max) {
+                        if (strlen($this->getParam($ruleFor)) > $max) {
                             $this->errors[]  = $this->getErrorMsg($ruleFor, 'max', ['charCount' => $max]);
                         }
                     }
@@ -46,18 +75,18 @@ class Validation
                         $min = trim(str_replace('min:', '', $ruleName));
                         if (!is_numeric($min))
                             throw new Exception('Validation rule '.$ruleName.' must have numeric value as argument');
-                        if (strlen($params[$ruleFor]) < $min) {
+                        if (strlen($this->getParam($ruleFor)) < $min) {
                             $this->errors[]  = $this->getErrorMsg($ruleFor, 'min', ['charCount' => $min]);
                         }
                     }
                     if ($ruleName == 'email') {
-                        if (!Str::isEmail($params[$ruleFor])) {
+                        if (!Str::isEmail($this->getParam($ruleFor))) {
                             $this->errors[]  = $this->getErrorMsg($ruleFor, $ruleName);
                         }
                     }
                     if (Str::startsWith($ruleName, 'eqt:')) {
                         $equalTo = trim(str_replace('eqt:', '', $ruleName));
-                        if ($params[$equalTo] != $params[$ruleFor]) {
+                        if ($this->params[$equalTo] != $this->getParam($ruleFor)) {
                             $this->errors[]  = $this->getErrorMsg($ruleFor, 'eqt', ['as' => $equalTo]);
                         }
                     }
@@ -68,13 +97,13 @@ class Validation
                         $exceptId = (!empty($uniqueAttrs[2])) ? $uniqueAttrs[2] : null;
                         if (count($uniqueAttrs) < 2 || (Str::empty($tableToCheck) || Str::empty($columnToCheck))) 
                             throw new Exception('Validation rule: unique rule must have {table}, {column} to check.');
-                        $uniqueRecord = Database::table($tableToCheck)->where($columnToCheck, $params[$ruleFor]);
+                        $uniqueRecord = Database::table($tableToCheck)->where($columnToCheck, $this->getParam($ruleFor));
                         if (!empty($exceptId)) {
                             $uniqueRecord->whereNot('id', $exceptId);
                         }
                         $uniqueRecord = $uniqueRecord->pluckAssocFirst($columnToCheck);
                         if (!empty($uniqueRecord) && !empty($uniqueRecord->$columnToCheck)) {
-                            $this->errors[]  = $this->getErrorMsg($ruleFor, 'unique', ['attrs' => $uniqueAttrs, 'value' => $params[$ruleFor]]);
+                            $this->errors[]  = $this->getErrorMsg($ruleFor, 'unique', ['attrs' => $uniqueAttrs, 'value' => $this->getParam($ruleFor)]);
                         }
                     }
                 }

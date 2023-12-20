@@ -92,8 +92,11 @@ class Redirect
                     Session::set(Str::camelize($methodParticles[1]), $arguments[0]);
                 }
             } else if (Str::startsWith($methodParticles[1], 'flash')) {
-                $flashType = Str::remove($methodParticles[1], 'flash');
-                Session::setFlash(Str::camelize($flashType), $arguments[0]);
+                $method_definer_split = explode($methodParticles[1], 'flash');
+                if (count($method_definer_split) == 1)
+                    Session::setFlash($arguments[0], $arguments[1]);
+                else
+                    Session::setFlash(Str::remove($methodParticles[1], 'flash'), $arguments[0]);
             }
             
             if (method_exists($this, $methodParticles[0])) {
