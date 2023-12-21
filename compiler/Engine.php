@@ -5,6 +5,7 @@ namespace Jolly;
 use Bones\Str;
 use Bones\FileNotFound;
 use Contributors\Particles\Pagination;
+use Error;
 use ErrorException;
 use Exception;
 use Models\Base\Model;
@@ -98,7 +99,7 @@ class Engine
     public static function setErrorBackTrace()
     {
         try {
-            $backtrace = debug_backtrace();
+            $backtrace = self::convertBackTraceToParsable(debug_backtrace());
 
             if (setting('app.stage', 'local') == 'production') {
                 error(500);
@@ -111,6 +112,30 @@ class Engine
         }
         
         exit;
+    }
+
+    public static function convertBackTraceToParsable($data) 
+    {
+        if (is_object($data) || is_array($data)) {
+            $result = [];
+    
+            foreach ($data as $key => $value) {
+                if ($value instanceof Error || $value instanceof Exception) {
+                    $result[$key] = [
+                        'message' => $value->getMessage(),
+                        'code' => $value->getCode(),
+                        'file' => $value->getFile(),
+                        'line' => $value->getLine(),
+                    ];
+                } else {
+                    $result[$key] = self::convertBackTraceToParsable($value);
+                }
+            }
+    
+            return $result;
+        }
+    
+        return $data;
     }
 
     public static function get(string $key)
