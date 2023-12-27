@@ -145,13 +145,18 @@ class Refill
             $table = Str::pluralize(Str::removeWords(strtolower($name), ['filler']));
         }
         $baseFillerCode .= "\tprotected \$table = '" . $table . "';" . PHP_EOL . PHP_EOL;
+        $baseFillerCode .= "\tprotected \$fake_filler;" . PHP_EOL . PHP_EOL;
+        $baseFillerCode .= "\tpublic function __construct()" . PHP_EOL;
+        $baseFillerCode .= "\t{" . PHP_EOL;
+        $baseFillerCode .= "\t\t\$this->fake_filler = new FakeFiller();" . PHP_EOL;
+        $baseFillerCode .= "\t}" . PHP_EOL . PHP_EOL;
         $baseFillerCode .= "\tpublic function fill()" . PHP_EOL;
         $baseFillerCode .= "\t{" . PHP_EOL;
         $baseFillerCode .= "\t\tDatabase::table(\$this->table)->insertMulti([" . PHP_EOL;
         $baseFillerCode .= "\t\t\t[" . PHP_EOL;
-        $baseFillerCode .= "\t\t\t\t'column_1' => 'value_1'," . PHP_EOL;
-        $baseFillerCode .= "\t\t\t\t'column_2' => 'value_2'," . PHP_EOL;
-        $baseFillerCode .= "\t\t\t\t'column_3' => 'value_3'," . PHP_EOL;
+        $baseFillerCode .= "\t\t\t\t'name' => \$this->fake_filler->name()," . PHP_EOL;
+        $baseFillerCode .= "\t\t\t\t'address' => \$this->fake_filler->address()," . PHP_EOL;
+        $baseFillerCode .= "\t\t\t\t'column_3' => \$this->fake_filler->randomString()," . PHP_EOL;
         $baseFillerCode .= "\t\t\t]," . PHP_EOL;
         $baseFillerCode .= "\t\t]);" . PHP_EOL;
         $baseFillerCode .= "\t}" . PHP_EOL . PHP_EOL;
