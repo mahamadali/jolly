@@ -1316,6 +1316,8 @@ class Builder
 
     public function insert(array $values, $get_last_insert_id = false)
     {
+        $this->PARAMS = null;
+        
         if (count($values) != count($values, COUNT_RECURSIVE)) {
             $multi_insert_query_set = "";
             foreach ($values as $row) {

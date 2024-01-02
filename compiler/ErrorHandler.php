@@ -29,7 +29,7 @@ function jollyHandleAppError($error)
 {
     if (!empty($error)) {
         if (ob_get_length() > 0) {
-            ob_clean();
+            //ob_clean();
         }
 
         if ($error instanceof Error) {
@@ -61,7 +61,7 @@ function jollyHandleAppError($error)
     }
 }
 
-set_exception_handler(function (Exception $exception) {
+set_exception_handler(function ($exception) {
     if (session()->has('from_cli', true)) {
         $console = (new Commander());
         $console->throwError($exception->getMessage() . PHP_EOL);

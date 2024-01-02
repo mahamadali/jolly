@@ -104,6 +104,7 @@ class Engine
             if (setting('app.stage', 'local') == 'production') {
                 error(500);
             } else {
+                ob_end_clean();
                 self::renderAtSystem('debugging/backtrace', compact('backtrace'));
             }
 

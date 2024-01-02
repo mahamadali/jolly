@@ -30,6 +30,7 @@ trait Relation
             'related_model' => $relatedModel->model,
             'foreign_key' => $foreignKey,
             'local_key' => $localKey,
+            'related_model_value' => $this->$localKey,
             'type' => __FUNCTION__
         ]);
     }
@@ -52,6 +53,7 @@ trait Relation
             'related_model' => $relatedModel->model,
             'foreign_key' => $foreignKey,
             'local_key' => $localKey,
+            'related_model_value' => $this->$localKey,
             'type' => __FUNCTION__
         ]);
     }
@@ -69,6 +71,7 @@ trait Relation
             'related_model' => $relatedModel->model,
             'foreign_key' => $foreignKey,
             'local_key' => $localKey,
+            'related_model_value' => $this->$localKey,
             'type' => __FUNCTION__
         ]);
     }
@@ -242,7 +245,7 @@ trait Relation
     {
         if (!empty($relation = $this->getRelation('hasOne'))) {
 
-            $relatedModel = $relation['related_model']();
+            $relatedModel = $relation['related_model'];
 
             $checkRelatedDataExistence = $relatedModel->where($relation['foreign_key'], $relation['related_model_value'])->first();
 
@@ -254,12 +257,12 @@ trait Relation
 
             $this->relationalProps = null;
 
-            return $relatedModel->___create($args[0]);
+            return $relatedModel->create($args[0]);
         } else if (!empty($relation = $this->getRelation('hasMany'))) {
 
             if (is_array($args[0])) {
 
-                $relatedModel = $relation['related_model']();
+                $relatedModel = $relation['related_model'];
 
                 if (count($args[0]) == count($args[0], COUNT_RECURSIVE)) {
                     $args[0][$relation['foreign_key']] = $relation['related_model_value'];
@@ -282,13 +285,13 @@ trait Relation
     {
         if (!empty($relation = $this->getRelation('hasOne')) || !empty($relation = $this->getRelation('hasMany'))) {
 
-            $relatedModel = $relation['related_model']();
+            $relatedModel = $relation['related_model'];
 
-            return $relatedModel->where($relation['foreign_key'], $relation['related_model_value'])->___delete();
+            return $relatedModel->where($relation['foreign_key'], $relation['related_model_value'])->delete();
         } else if (!empty($relation = $this->getRelation('parallelTo'))) {
 
             $relatedModel = $relation['related_model'];
-            return $relatedModel->___delete();
+            return $relatedModel->delete();
         }
 
         throw new BadMethodException('Method {' . __FUNCTION__ . '} not found on ' . $this->model);
@@ -322,6 +325,7 @@ trait Relation
         if (empty($relation)) return null;
 
         if (!empty($this->relationalProps)) {
+            $this->relationalProps = (!empty($this->relationalProps[0])) ? $this->relationalProps[0] : $this->relationalProps;
             if (!empty($this->relationalProps['related_model']) && !empty($this->relationalProps['type'])) {
                 if ($this->relationalProps['type'] == $relation) {
                     return $this->relationalProps;
