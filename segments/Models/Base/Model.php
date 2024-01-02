@@ -244,8 +244,8 @@ class Model
             $model_obj = $this->build($model_obj, $entry);
             $model_obj->db->model = $model_obj;
 
-            if (!empty($model_obj)) {
-                $result[$key] = $model_obj;
+            if (!empty($model_obj) && isset($model_obj->dynamicProps)) {
+                $result[$key] = $model_obj->dynamicProps;
             }
         }
 
