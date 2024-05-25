@@ -116,10 +116,10 @@ class Mailer extends AutoMethodMap
 
     protected function autoFlatArray($array = [])
     {
-        foreach ($array as $attachmentPath => $attachmentAs) {
-            if (is_numeric($attachmentPath)) {
-                $array[$attachmentAs] = basename($attachmentAs);
-                unset($array[$attachmentPath]);
+        foreach ($array as $key => $value) {
+            if (is_numeric($key)) {
+                $array[$value] = basename($value);
+                unset($array[$key]);
             }
         }
 
