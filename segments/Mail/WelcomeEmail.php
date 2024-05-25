@@ -15,10 +15,15 @@ class WelcomeEmail extends Mailer
 
     public function prepare()
     {
-        return $this->html(content('mails/welcome', ['user' => $this->user]))
-                    ->to($this->user->email)
+        return $this->html('hello')
+                    ->to('test')
                     ->subject('Welcome to ' . setting('app.title', 'Jolly Framework!'))
-                    ->attach('assets/css/welcome.css', 'checkout_this.css');
+                    ->attach('path/to/file/one.csv')
+                    ->attach('path/to/file/two.txt', 'custom-name.txt') // Attach with custom name
+                    ->attach([ // Attach set of attachments
+                        'path/to/file/three.png',
+                        'path/to/file/four.gif' => 'dancing-elephant.gif' // Attach with custom name
+                    ]);
     }
 
 }

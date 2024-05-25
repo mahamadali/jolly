@@ -96,12 +96,34 @@ class Mailer extends AutoMethodMap
 
     public function __attach($attachmentPath, $attachmentAs = '')
     {
-        if (empty($attachmentAs)) {
-            $attachmentAs = basename($attachmentPath);
+        if (gettype($attachmentPath) === 'array') {
+            
+            $attachment_set = $this->autoFlatArray($attachmentPath);
+
+            foreach ($attachment_set as $attachmentPath => $attachmentAs) {
+                $this->attachments[$attachmentAs] = $attachmentPath;
+            }
+
+        } else {
+            if (empty($attachmentAs))
+                $attachmentAs = basename($attachmentPath);
+    
+            $this->attachments[$attachmentAs] = $attachmentPath;
         }
 
-        $this->attachments[$attachmentAs] = $attachmentPath;
         return $this;
+    }
+
+    protected function autoFlatArray($array = [])
+    {
+        foreach ($array as $attachmentPath => $attachmentAs) {
+            if (is_numeric($attachmentPath)) {
+                $array[$attachmentAs] = basename($attachmentAs);
+                unset($array[$attachmentPath]);
+            }
+        }
+
+        return $array;
     }
 
     public function __headers($key, $value)
