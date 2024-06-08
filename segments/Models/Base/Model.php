@@ -54,6 +54,15 @@ class Model
         $this->db->model = $this;
     }
 
+    public function prepareConnection($connection_name) 
+    {
+        $this->db = Database::use($connection_name)->table($this->table);
+
+        $this->db->model = $this;
+
+        return $this;
+    }
+
     public function prepareWith(...$attrs)
     {
         $this->with = array_merge($this->with, resolveAsArray($attrs));

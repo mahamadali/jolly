@@ -159,6 +159,13 @@ class Config extends Database
         return self::$PDO;
     }
 
+    public function disconnect()
+    {
+        self::$PDO = null;
+
+        return null;
+    }
+
     public function getFetch()
     {
         return $this->FETCH;

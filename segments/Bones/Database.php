@@ -9,23 +9,13 @@ use Bones\Skeletons\Database\Raw;
 class Database extends Builder
 {
     protected static $CONFIG_LIST;
-    protected static $USE_DATABASE = 'primary';
+    protected static $USE_DATABASE = null;
     protected static $CHANGE_ONCE = false;
     protected static $KEEP_LOG = false;
 
     public function __construct()
     {
-        $primary_db = $this->primaryDB();
-        $this->addConnection('primary', [
-            'host' => $primary_db['host'],
-            'port' => $primary_db['port'],
-            'database' => $primary_db['db'],
-            'username' => $primary_db['username'],
-            'password' => $primary_db['password'],
-            'charset' => (!empty($primary_db['charset'])) ? $primary_db['charset'] : Config::UTF8,
-            'collation' => (!empty($primary_db['collation'])) ? $primary_db['collation'] : Config::UTF8_GENERAL_CI,
-            'fetch' => Config::FETCH_CLASS
-        ]);
+        $this->prepareConnections();
     }
 
     public static function addConnection($config_name, array $config_params)
@@ -40,6 +30,9 @@ class Database extends Builder
 
     private static function getCurrentConfig()
     {
+        if (empty(self::$USE_DATABASE))
+            self::$USE_DATABASE = self::primaryDB();
+
         return self::$CONFIG_LIST[self::$USE_DATABASE];
     }
 
@@ -53,6 +46,7 @@ class Database extends Builder
     public static function use(string $config_name)
     {
         self::$USE_DATABASE = $config_name;
+
         return new static;
     }
 
@@ -116,22 +110,41 @@ class Database extends Builder
         $primaryDBFound = false;
         foreach ($settings as $database => $setting) {
             if (is_array($setting)) {
-                $setting['db'] = $database;
                 if (key_exists('host', $setting) && key_exists('username', $setting) && key_exists('password', $setting) && key_exists('is_primary', $setting)) {
                     if ($setting['is_primary'] == true) {
                         if ($primaryDBFound) {
                             throw new MultiplePrimaryDBFound('Mutiple primary DB found in settings/database.php');
                         }
-                        $primaryDB = $setting;
+                        $primaryDB = $database;
                         $primaryDBFound = true;
                     } else if (!$primaryDBFound) {
-                        $primaryDB = $setting;
+                        $primaryDB = $database;
                     }
                 }
             }
         }
 
         return $primaryDB;
+    }
+
+    public function prepareConnections()
+    {
+        $database_connections = setting('database');
+
+        foreach ($database_connections as $database_name => $database_connection) {
+            if (is_array($database_connection)) {
+                $this->addConnection($database_name, [
+                    'host' => $database_connection['host'],
+                    'port' => $database_connection['port'],
+                    'database' => $database_name,
+                    'username' => $database_connection['username'],
+                    'password' => $database_connection['password'],
+                    'charset' => (!empty($database_connection['charset'])) ? $database_connection['charset'] : Config::UTF8,
+                    'collation' => (!empty($database_connection['collation'])) ? $database_connection['collation'] : Config::UTF8_GENERAL_CI,
+                    'fetch' => Config::FETCH_CLASS
+                ]);
+            }
+        }
     }
 
     public static function setLastExecutedQuery($query)
