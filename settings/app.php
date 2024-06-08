@@ -14,7 +14,7 @@ return [
     'TITLE' => 'Jolly - A tiny PHP Framework',
 
     'AUTHOR' => [
-        'NAME' => 'Mohammad Ali Manknojiya'
+        'NAME' => 'Mahammadali Manknojiya'
     ],
     
 ];

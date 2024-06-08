@@ -218,7 +218,7 @@ class Router
                     $methodToInvoke,
                     []
                 ]);
-                self::serve($response, self::$routes[$method][$route]);
+                // self::serve($response, self::$routes[$method][$route]);
             } else {
                 op($callback);
             }
