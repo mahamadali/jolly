@@ -218,7 +218,7 @@ class Router
                     $methodToInvoke,
                     []
                 ]);
-                // self::serve($response, self::$routes[$method][$route]);
+                self::serve($response, self::$routes[$method][$route]);
             } else {
                 op($callback);
             }
@@ -707,7 +707,7 @@ class Router
 
     public static function serve($content, $route = null)
     {
-        response()->format(self::serveAs($route));
+        // response()->format(self::serveAs($route));
 
         // Calculate request->response total execution time in seconds
         $current_time = microtime(true);
