@@ -15,7 +15,7 @@
                     <?php echo setting('app.title', 'Jolly - A tiny PHP Framework'); ?>
                 </div>
                 <div class="footer">
-                    <span>- <?php echo trans('built_n_managing_by'); ?> <?php echo setting('app.author.name', 'Mohammad Ali Manknojiya [ manknojiya121@gmail.com ]'); ?></span>
+                    <span>- <?php echo trans('built_n_managing_by'); ?> <?php echo setting('app.author.name', 'Mahammadali Manknojiya [ manknojiya121@gmail.com ]'); ?></span>
                 </div>
             </div>
         </div>
