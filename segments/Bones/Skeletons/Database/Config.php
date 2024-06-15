@@ -150,7 +150,7 @@ class Config extends Database
 
             if (Database::$CHANGE_ONCE) {
                 Database::$CHANGE_ONCE = false;
-                Database::$USE_DATABASE = 'main';
+                Database::$USE_DATABASE = Database::primaryDB();
             }
 
             $this->setConnected();
