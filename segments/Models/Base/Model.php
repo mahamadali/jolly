@@ -44,7 +44,7 @@ class Model
     {
         $this->model = get_class($this);
         $this->table = (empty($this->table)) ? Str::camelize(Str::pluralize(basename($this->model))) : $this->table;
-        $this->db = Database::table($this->table);
+        $this->db = Database::use(Database::primaryDB())->table($this->table);
         $this->db->setPrimaryKey($this->primary_key);
         $this->db->setTimestampsStatus($this->timestamps, $this->created_at_column, $this->updated_at_column);
         $this->db->setTrashMaskStatus($this->hasTrashMask(), $this->getTrashMaskColumn());

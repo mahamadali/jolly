@@ -90,7 +90,7 @@ class Builder
 
     protected function execute($query, $params = [], $return = false)
     {
-        if (!self::$PDO_CONN)
+        if (!self::$PDO_CONN || self::$PDO_CONN)
             self::$PDO_CONN = $this->CONFIG->connect();
             
         $this->PARAMS = $params;
