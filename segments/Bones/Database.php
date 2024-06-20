@@ -33,6 +33,9 @@ class Database extends Builder
         if (empty(self::$USE_DATABASE))
             self::$USE_DATABASE = self::primaryDB();
 
+        if (!isset(self::$CONFIG_LIST) || !isset(self::$CONFIG_LIST[self::$USE_DATABASE]))
+            throw new DatabaseException('Connection "' . self::$USE_DATABASE . "' not found");
+
         return self::$CONFIG_LIST[self::$USE_DATABASE];
     }
 
@@ -145,6 +148,25 @@ class Database extends Builder
                 ]);
             }
         }
+    }
+
+    public static function totalConnections()
+    {
+        $database_connections = setting('database');
+
+        $total_connections = 1;
+
+        foreach ($database_connections as $database_connection) {
+            if (is_array($database_connection))
+                $total_connections += 1;
+        }
+
+        return $total_connections;
+    }
+
+    public static function hasMultipleConnections()
+    {
+        return self::totalConnections() > 1;
     }
 
     public static function setLastExecutedQuery($query)

@@ -140,7 +140,7 @@ class Config extends Database
 
     public function connect()
     {
-        if (!self::$PDO || self::$PDO) {
+        if (!self::$PDO || Database::hasMultipleConnections()) {
             $dsn = $this->makeConnectionString();
 
             self::$PDO = new \PDO($dsn, $this->USERNAME, $this->PASSWORD, [
