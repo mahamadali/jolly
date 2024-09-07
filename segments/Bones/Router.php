@@ -818,10 +818,15 @@ class Router
 
     public static function url(string $path)
     {
-        $url = setting('app.base_url') . '/';
+        $url = setting('app.base_url');
 
-        if (!empty($subDir = setting('app.sub_dir', ''))) {
-            $url .= $subDir . '/';
+        if (empty(trim($url)))
+            $url = URL::getCurrentHostname();
+
+        $url = rtrim($url, '/') . '/';
+
+        if (!empty($sub_dir = setting('app.sub_dir', ''))) {
+            $url .= trim($sub_dir, '/') . '/';
         }
 
         return $url . $path;
