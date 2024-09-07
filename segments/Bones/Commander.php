@@ -180,6 +180,10 @@ class Commander
                 (new BackgroundAction())->clearAll();
                 return $this->showMsg('All background processes are cleared', [], 'success');
                 break;
+            case 'cache':
+                Cache::clear();
+                return $this->showMsg('Cache cleared', [], 'success');
+                break;
             default:
                 return $this->throwError('%s is not a valid segment to clear', [$commandFor]);
                 break;

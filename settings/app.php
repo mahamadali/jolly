@@ -3,7 +3,7 @@
 return [
 
     // Set base url of your project
-    'BASE_URL' => 'http://localhost',
+    'BASE_URL' => 'https://localhost',
 
     // Please set it blank if your project is on root or enter your sub directory
     'SUB_DIR' => 'jolly', 

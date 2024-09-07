@@ -8,6 +8,7 @@ segments/Models/*
 segments/Routes/
 node_modules/
 locker/system/app-structure.json
+locker/cache/
 dist/
 *.class
 *.py[cod]

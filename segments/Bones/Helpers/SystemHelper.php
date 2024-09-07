@@ -1,5 +1,6 @@
 <?php
 
+use Bones\Cache;
 use Bones\Language;
 use Bones\Str;
 use Bones\Router;
@@ -14,8 +15,13 @@ use Bones\VariableFileNotFound;
 use Bones\VariableFileKeyNotFound;
 
 if (!function_exists('findFileVariableByKey')) {
-    function findFileVariableByKey($file, $param, $default = '')
+    function findFileVariableByKey($file, $param, $default = '', $cached = false)
     {
+        $cache_key = $file . '.' . $param;
+
+        if ($cached && !empty($value = Cache::get($cache_key)))
+            return $value;
+
         $paramChain = explode('.', $param);
         if (!empty($paramChain[0]) && !empty($paramChain[1])) {
             $variableFile = $file . '/' . $paramChain[0] . '.php';
@@ -30,16 +36,20 @@ if (!function_exists('findFileVariableByKey')) {
                             continue;
                         if ($cKey == (count($paramChain) - 1)) {
                             if (!empty($cursorAt) && !empty($cursorAt[$key])) {
+                                ($cached) ? Cache::set($cache_key, $cursorAt[$key]) : null;
                                 return $cursorAt[$key];
                             } else if (!empty($variables[$key])) {
+                                ($cached) ? Cache::set($cache_key, $variables[$key]) : null;
                                 return $variables[$key];
                             } else {
+                                ($cached) ? Cache::set($cache_key, $default) : null;
                                 return $default;
                             }
                         } else {
                             if (empty($cursorAt)) {
                                 if (empty($variables[$key]))
                                     if (!empty($default)) {
+                                        ($cached) ? Cache::set($cache_key, $default) : null;
                                         return $default;
                                     } else {
                                         throw new VariableFileKeyNotFound('`' . $key . '` key could not find in '. $file . '/' . $paramChain[0] . '.php');
@@ -51,10 +61,12 @@ if (!function_exists('findFileVariableByKey')) {
                         }
                     }
                 } else {
+                    ($cached) ? Cache::set($cache_key, $default) : null;
                     return $default;
                 }
             } else {
                 if (!empty($default)) {
+                    ($cached) ? Cache::set($cache_key, $default) : null;
                     return $default;
                 }
                 throw new VariableFileNotFound($file . '/' . $paramChain[0] . '.php file not found');
@@ -65,17 +77,21 @@ if (!function_exists('findFileVariableByKey')) {
                 if (file_exists($variableFile)) {
                     $variables = require($variableFile);
                     if (!empty($variables)) {
+                        ($cached) ? Cache::set($cache_key, $variables) : null;
                         return $variables;
                     } else {
+                        ($cached) ? Cache::set($cache_key, $default) : null;
                         return $default;
                     }
                 } else {
                     if (!empty($default)) {
+                        ($cached) ? Cache::set($cache_key, $default) : null;
                         return $default;
                     }
                     throw new VariableFileNotFound($file . '/' . $paramChain[0] . '.php file not found');
                 }
             } else {
+                ($cached) ? Cache::set($cache_key, $default) : null;
                 return $default;
             }
         }
@@ -83,9 +99,9 @@ if (!function_exists('findFileVariableByKey')) {
 }
 
 if (!function_exists('setting')) {
-    function setting($param, $default = '')
+    function setting($param, $default = '', $cached = true)
     {
-        return findFileVariableByKey('settings', $param, $default);
+        return findFileVariableByKey('settings', $param, $default, $cached);
     }
 }
 
