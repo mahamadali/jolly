@@ -89,7 +89,7 @@ class Adjustor
             FROM information_schema.tables
             WHERE table_schema = '" . Database::primaryDB() . "';");
 
-            Database::rawQuery('SET FOREIGN_KEY_CHECKS=0;');
+            Database::rawQuery('SET GLOBAL FOREIGN_KEY_CHECKS=0;');
 
             foreach ($statementPairs as $statementPair) {
                 $this->console->showMsgAndContinue('Dropping table [' . $statementPair->table_name . ']...' . PHP_EOL);
@@ -97,7 +97,7 @@ class Adjustor
                 $this->console->showMsgAndContinue('Table [' . $statementPair->table_name . '] dropped!' . PHP_EOL);
             }
 
-            Database::rawQuery('SET FOREIGN_KEY_CHECKS=1;');
+            Database::rawQuery('SET GLOBAL FOREIGN_KEY_CHECKS=1;');
 
             $this->setupGround();
             $this->console->showMsgAndContinue('[' . $this->table . '] table created!' . PHP_EOL);
