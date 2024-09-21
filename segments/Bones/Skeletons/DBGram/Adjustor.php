@@ -87,7 +87,7 @@ class Adjustor
             $this->console->showMsgAndContinue('dbgram(s) fresh in progress...' . PHP_EOL);
             $statementPairs = Database::rawQuery("SELECT concat('DROP TABLE IF EXISTS `', table_name, '`;') as statement, table_name
             FROM information_schema.tables
-            WHERE table_schema = '" . Database::primaryDB()['db'] . "';");
+            WHERE table_schema = '" . Database::primaryDB() . "';");
 
             Database::rawQuery('SET FOREIGN_KEY_CHECKS=0;');
 
@@ -511,7 +511,7 @@ class Adjustor
 
     public function exportDB()
     {
-        $database = Database::primaryDB()['db'];
+        $database = Database::primaryDB();
         $tables = [];
 
         if (empty($tables)) {
