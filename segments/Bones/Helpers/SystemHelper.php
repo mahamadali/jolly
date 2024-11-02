@@ -15,12 +15,18 @@ use Bones\VariableFileNotFound;
 use Bones\VariableFileKeyNotFound;
 
 if (!function_exists('findFileVariableByKey')) {
-    function findFileVariableByKey($file, $param, $default = '', $cached = false)
+    function findFileVariableByKey($file, $param, $default = '')
     {
         $cache_key = $file . '.' . $param;
 
-        if ($cached && !empty($value = Cache::get($cache_key)))
-            return $value;
+        $cached = Cache::isEnabled();
+
+        if ($cached) {
+            $value = Cache::get($cache_key);
+            if ($value !== null) {
+                return $value;  // Return the cached value
+            }
+        }
 
         $paramChain = explode('.', $param);
         if (!empty($paramChain[0]) && !empty($paramChain[1])) {
@@ -99,9 +105,26 @@ if (!function_exists('findFileVariableByKey')) {
 }
 
 if (!function_exists('setting')) {
-    function setting($param, $default = '', $cached = true)
+    function setting($param, $default = '')
     {
-        return findFileVariableByKey('settings', $param, $default, $cached);
+        return findFileVariableByKey('settings', $param, $default);
+    }
+}
+
+if (!function_exists('cacheSetting')) {
+    function cacheSetting($variable, $default = '')
+    {   
+        $cache_file = 'settings/cache.php';
+
+        if (!file_exists($cache_file))
+            return $default;
+
+        $variables = require($cache_file);
+
+        if (!is_array($variables) || empty($variables))
+            return $default;
+
+        return (isset($variables[$variable])) ? $variables[$variable] : $default;
     }
 }
 
@@ -196,85 +219,33 @@ if (!function_exists('redirectPageTo')) {
 
 if (!function_exists('op')) {
     function op(...$args) {
-        echo '<style>';
-        echo '.op-collapsible { display: flex; flex-direction: column; }';
-        echo '.op-collapsible .op-title { display: flex; align-items: center; }';
-        echo '.op-collapsible .op-icon::before { content: "+"; margin-right: 5px; width: 16px; text-align: center; cursor: pointer; }';
-        echo '.op-collapsible .op-icon.collapsed::before { content: "-"; }';
-        echo '.op-content { display: none; background-color: #f7f7f7; padding-left: 10px; padding-right:10px; padding-top: 2px; margin-top: 2px; margin-bottom: 2px; }';
-        echo '.op-content pre { margin: 0; white-space: pre-wrap; }';
-        echo '</style>';
-        echo '<div style="background-color: #f7f7f7; padding: 5px; font-size: 14px;">';
-        $uniqueId = 1;
+        echo '<style>
+            .op-container { background-color: #f9f9f9; padding: 15px; font-size: 14px; font-family: Arial, sans-serif; color: #333; }
+            .op-container pre { background-color: #f3f3f3; padding: 10px; border: 1px solid #ddd; overflow-x: auto; white-space: pre; word-wrap: break-word; }
+            .op-key { color: #007acc; font-weight: bold; }
+            .op-value-string { color: #d14; }
+            .op-value-number { color: #098658; }
+            .op-value-null { color: #999; font-style: italic; }
+            .op-arrow { color: #666; margin: 0 5px; }
+        </style>';
+
+        echo '<div class="op-container">';
         foreach ($args as $arg) {
-            echo '<div class="op-collapsible">';
-            op_recursive($arg, $uniqueId);
-            echo '</div>';
-            $uniqueId++;
+            echo '<pre>';
+            ob_start();
+            print_r($arg);
+            $output = ob_get_clean();
+
+            // Add styling to output
+            $output = preg_replace('/\[([^\]]+)\] => /', '<span class="op-key">$1</span><span class="op-arrow"> => </span>', $output);
+            $output = preg_replace('/=>\s*([0-9]+)\b/', '=> <span class="op-value-number">$1</span>', $output);
+            $output = preg_replace('/=>\s*NULL\b/', '=> <span class="op-value-null">NULL</span>', $output);
+            $output = preg_replace('/=>\s*\'([^\']*)\'/', '=> <span class="op-value-string">\'$1\'</span>', $output);
+
+            echo $output;
+            echo '</pre>';
         }
         echo '</div>';
-        echo '<script>';
-        echo 'document.addEventListener("DOMContentLoaded", function() {';
-        echo '  const collapsibleTriggers = document.querySelectorAll(".op-collapsible .op-icon");';
-        echo '  collapsibleTriggers.forEach(function(trigger) {';
-        echo '    trigger.addEventListener("click", function(e) {';
-        echo '      e.stopPropagation();';
-        echo '      const opId = this.getAttribute("data-op-id");';
-        echo '      const content = document.querySelector(".op-content[data-op-id=\'" + opId + "\']");';
-        echo '      const isCollapsed = content.style.display === "block";';
-        echo '      content.style.display = isCollapsed ? "none" : "block";';
-        echo '      this.classList.toggle("collapsed", !isCollapsed);';
-        echo '    });';
-        echo '  });';
-        echo '  if (typeof document.querySelectorAll(".op-collapsible .op-icon")[0] != "undefined") {';
-        echo '    document.querySelectorAll(".op-collapsible .op-icon")[0].click();';
-        echo '  }';
-        echo '});';
-        echo '</script>';
-    }
-}
-
-if (!function_exists('op_recursive')) {
-    function op_recursive($data, $opId, $key = '') {
-        echo '<div class="op-title">';
-        echo '<div class="op-icon" data-op-id="' . $opId . '"></div>';
-        if (is_array($data) || is_object($data)) {
-
-            echo '<span style="background-color: transparent;color: #1E90FF; font-family: monospace;">';
-            if (is_object($data)) {
-                echo '<strong>' . get_class($data) . '</strong>';
-            } else {
-                $array_set_title = (!empty($key)) ? $key : gettype($data);
-                echo '<strong>' . $array_set_title . '(' . count($data) . ')</strong>';
-            }
-            echo '</span>';
-
-            echo '</div>'; // Close .op-title
-            echo '<div class="op-content" data-op-id="' . $opId . '">';
-            foreach ($data as $key => $value) {
-                echo '<div class="op-collapsible">';
-                if (is_array($value) || is_object($value)) {
-                    op_recursive($value, $opId . '_' . $key, $key);
-                } else {
-                    $key = (!empty($key)) ? trim($key) : '';
-                    echo '<div style="margin-left: 20px; margin-bottom: 2px; ">';
-                    echo '<pre>';
-                    echo '<span style="color: #999;">' . $key . '</span>: <span style="color: #FF0000;">' . '' . $value . '</span>';
-                    echo '</pre>';
-                    echo '</div>';
-                }
-                echo '</div>';
-            }
-            echo '</div>';
-        } else {
-            echo '<strong>' . gettype($data) . '</strong>';
-            echo '</div>'; // Close .op-title
-            echo '<div>';
-            echo '<pre>';
-            echo htmlspecialchars($data);
-            echo '</pre>';
-            echo '</div>';
-        }
     }
 }
 

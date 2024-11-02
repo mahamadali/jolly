@@ -43,7 +43,8 @@
             "15": "URL.php",
             "16": "Validation.php",
             "17": "JollyManager.php",
-            "18": "Set.php"
+            "18": "Set.php",
+            "19": "Cache.php"
         },
         "Contributors": {
             "Mail": {

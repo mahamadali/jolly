@@ -12,7 +12,7 @@ class Cache
     {
         if (self::$cache_dir === null) {
             // Fetch cache directory from settings or use default
-            self::$cache_dir = setting('cache.directory', locker_path('cache'), false);
+            self::$cache_dir = locker_path('cache');
             self::$cache_dir = rtrim(self::$cache_dir, '/') . '/';
         }
 
@@ -40,8 +40,10 @@ class Cache
     }
 
     // Set data into cache (memory and file)
-    public static function set($key, $value, $ttl = 3600)
+    public static function set($key, $value, $ttl = null)
     {
+        $ttl = (!is_null($ttl)) ? $ttl : cacheSetting('ttl', 3600);
+
         // Store in memory cache
         self::$memory_cache[$key] = $value;
 
@@ -93,5 +95,11 @@ class Cache
         if (!is_dir($cacheDir)) {
             mkdir($cacheDir, 0755, true);
         }
+    }
+
+    // Ensure the cache directory exists
+    public static function isEnabled()
+    {
+        return cacheSetting('enabled', false);
     }
 }

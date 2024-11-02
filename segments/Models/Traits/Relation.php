@@ -71,7 +71,7 @@ trait Relation
             'related_model' => $relatedModel->model,
             'foreign_key' => $foreignKey,
             'local_key' => $localKey,
-            'related_model_value' => $this->$localKey,
+            'related_model_value' => $this->$localKey ?? null,
             'type' => __FUNCTION__
         ]);
     }

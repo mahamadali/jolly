@@ -360,11 +360,27 @@ class Model
 
     protected function initiate($name, $arguments = [])
     {
-        if (!method_exists($this->db, $name)) {
+        if (!method_exists($this->db, $name) && !$this->isRelationalMethod($name)) {
             throw new BadMethodException('Method {' . $name . '} not found in ' . $this->model);
+        } else if ($this->isRelationalMethod($name)) {
+            return $this->db->{$this->fineTuneRelationalMethod($name)}(...$arguments);
         }
 
         return $this->db->{$name}(...$arguments);
+    }
+
+    protected function isRelationalMethod($method)
+    {
+        $method_name_partials = explode(':', $method);
+
+        return method_exists($this, $method_name_partials[0]);
+    }
+
+    protected function fineTuneRelationalMethod($method)
+    {
+        $method_name_partials = explode(':', $method);
+
+        return (!empty($method_name_partials[0])) ? $method_name_partials[0] : null;
     }
 
     public static function __callStatic($name, $arguments)

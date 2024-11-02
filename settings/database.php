@@ -5,7 +5,7 @@ return [
     'enable' => true,
 
     // Database details [ Key of this set is database name ]
-    'laravel' => [
+    'jolly_master' => [
         'host' => 'localhost',
         'username' => 'root',
         'password' => '',
@@ -16,7 +16,7 @@ return [
         'is_primary' => true
     ],
 
-    'mymovingpartner' => [
+    'jolly_child' => [
         'host' => 'localhost',
         'username' => 'root',
         'password' => '',

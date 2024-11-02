@@ -298,6 +298,12 @@ trait SelfResolve
     public function buildRelationalData($with, $entries, $result, $relational_props)
     {
         if ($this->prop('skip_relationships')) return $result;
+
+        $filter_relational_name = explode(':', $with);
+
+        $with = $filter_relational_name[0];
+
+        $relational_model_column_set = !empty($filter_relational_name[1]) ? ($filter_relational_name[1]) : '*';
         
         if ($relational_props['type'] == 'hasMany') {
             if (is_array($entries)) {
@@ -311,7 +317,7 @@ trait SelfResolve
 
             if (!empty($forein_key_values_to_map)) {
                 $related_model_obj = new $relational_props['related_model']();
-                $related_model_obj = $related_model_obj->prepareWithout($this->circularWiths($related_model_obj))->whereIn($relational_props['foreign_key'], array_unique($forein_key_values_to_map));
+                $related_model_obj = $related_model_obj->select($relational_model_column_set)->prepareWithout($this->circularWiths($related_model_obj))->whereIn($relational_props['foreign_key'], array_unique($forein_key_values_to_map));
                 
                 $relational_data = $related_model_obj->getWithoutSetWrapper();
 
@@ -346,7 +352,7 @@ trait SelfResolve
             if (!empty($forein_key_values_to_map)) {
                 $related_model_obj = new $relational_props['related_model']();
                 
-                $related_model_obj = $related_model_obj->prepareWithout($this->circularWiths($related_model_obj))->whereIn($relational_props['local_key'], array_unique($forein_key_values_to_map));
+                $related_model_obj = $related_model_obj->select($relational_model_column_set)->prepareWithout($this->circularWiths($related_model_obj))->whereIn($relational_props['local_key'], array_unique($forein_key_values_to_map));
 
                 $relational_data = $related_model_obj->getWithoutSetWrapper();
 
@@ -381,7 +387,7 @@ trait SelfResolve
             if (!empty($forein_key_values_to_map)) {
                 $related_model_obj = new $relational_props['related_model']();
                 
-                $related_model_obj = $related_model_obj->prepareWithout($this->circularWiths($related_model_obj))->whereIn($relational_props['foreign_key'], array_unique($forein_key_values_to_map));
+                $related_model_obj = $related_model_obj->select($relational_model_column_set)->prepareWithout($this->circularWiths($related_model_obj))->whereIn($relational_props['foreign_key'], array_unique($forein_key_values_to_map));
 
                 $relational_data = $related_model_obj->getWithoutSetWrapper();
 
@@ -482,7 +488,7 @@ trait SelfResolve
                 
                 if (!empty($intermediate_data)) {
                     $final_model_obj = new $final_model();
-                    $final_model_obj = $final_model_obj->prepareWithout($this->circularWiths($final_model_obj))->whereIn($final_model_foreign_key, array_column($intermediate_data, $intermediate_model_foreign_key));
+                    $final_model_obj = $final_model_obj->select($relational_model_column_set)->prepareWithout($this->circularWiths($final_model_obj))->whereIn($final_model_foreign_key, array_column($intermediate_data, $intermediate_model_foreign_key));
 
                     $final_data = $final_model_obj->getWithoutSetWrapper();
 
@@ -537,7 +543,7 @@ trait SelfResolve
                 
                 if (!empty($intermediate_data)) {
                     $final_model_obj = new $final_model();
-                    $final_model_obj = $final_model_obj->prepareWithout($this->circularWiths($final_model_obj))->whereIn($final_model_local_key, array_unique(array_column($intermediate_data, $intermediate_to_secondary_foreign_key)));
+                    $final_model_obj = $final_model_obj->select($relational_model_column_set)->prepareWithout($this->circularWiths($final_model_obj))->whereIn($final_model_local_key, array_unique(array_column($intermediate_data, $intermediate_to_secondary_foreign_key)));
 
                     $final_data = $final_model_obj->getWithoutSetWrapper();
 
