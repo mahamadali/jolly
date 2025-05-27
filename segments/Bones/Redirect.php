@@ -93,7 +93,7 @@ class Redirect
                 }
             } else if (Str::startsWith($methodParticles[1], 'flash')) {
                 $method_definer_split = explode($methodParticles[1], 'flash');
-                if (count($method_definer_split) == 1)
+                if (count($method_definer_split) == 2)
                     Session::setFlash($arguments[0], $arguments[1]);
                 else
                     Session::setFlash(Str::remove($methodParticles[1], 'flash'), $arguments[0]);
